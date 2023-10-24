@@ -1,7 +1,7 @@
 package kopo.poly.service.impl;
 
 import kopo.poly.dto.MovieDTO;
-import kopo.poly.persistance.mapper.IMovieMapper;
+import kopo.poly.mapper.IMovieMapper;
 import kopo.poly.service.IMovieService;
 import kopo.poly.util.CmmUtil;
 import kopo.poly.util.DateUtil;

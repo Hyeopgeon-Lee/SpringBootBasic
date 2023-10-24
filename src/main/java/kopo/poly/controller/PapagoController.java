@@ -1,5 +1,6 @@
 package kopo.poly.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import kopo.poly.dto.PapagoDTO;
 import kopo.poly.service.IPapagoService;
 import kopo.poly.util.CmmUtil;
@@ -9,7 +10,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Optional;
 
 @Slf4j

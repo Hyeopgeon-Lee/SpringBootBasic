@@ -1,5 +1,6 @@
 package kopo.poly.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import kopo.poly.dto.MailDTO;
 import kopo.poly.dto.MsgDTO;
 import kopo.poly.service.IMailService;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
 
 @Slf4j
 @RequestMapping(value = "/mail")

@@ -1,5 +1,6 @@
 package kopo.poly.service.impl;
 
+import jakarta.mail.internet.MimeMessage;
 import kopo.poly.dto.MailDTO;
 import kopo.poly.service.IMailService;
 import kopo.poly.util.CmmUtil;
@@ -10,7 +11,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import javax.mail.internet.MimeMessage;
 
 @Slf4j
 @RequiredArgsConstructor

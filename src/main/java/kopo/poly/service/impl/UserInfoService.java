@@ -2,7 +2,7 @@ package kopo.poly.service.impl;
 
 import kopo.poly.dto.MailDTO;
 import kopo.poly.dto.UserInfoDTO;
-import kopo.poly.persistance.mapper.IUserInfoMapper;
+import kopo.poly.mapper.IUserInfoMapper;
 import kopo.poly.service.IMailService;
 import kopo.poly.service.IUserInfoService;
 import kopo.poly.util.CmmUtil;
