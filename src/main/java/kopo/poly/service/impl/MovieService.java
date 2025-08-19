@@ -36,7 +36,7 @@ public class MovieService implements IMovieService {
     public int collectMovieRank() throws Exception {
 
         // 로그 찍기(추후 찍은 로그를 통해 이 함수에 접근했는지 파악하기 용이하다.)
-        log.info(this.getClass().getName() + ".collectMovieRank Start!");
+        log.info("{}.collectMovieRank Start!", this.getClass().getName());
 
         String collectTime = DateUtil.getDateTime("yyyyMMdd"); // 수집날짜 = 오늘 날짜
 
@@ -46,7 +46,7 @@ public class MovieService implements IMovieService {
         // 기존에 수집된 영화 순위 데이터 삭제하기
         movieMapper.deleteMovieInfo(pDTO);
 
-        pDTO = null; // 기존 등록된 영화 순위 삭제 후, pDTO 값 제거하기
+        // 기존 등록된 영화 순위 삭제 후, pDTO 값 제거하기
 
         int res = 0; //크롤링 결과 (0보다 크면 크롤링 성공)
 
@@ -54,7 +54,7 @@ public class MovieService implements IMovieService {
         String url = "http://www.cgv.co.kr/movies/";
 
         // JSOUP 라이브러리를 통해 사이트 접속되면, 그 사이트의 전체 HTML소스 저장할 변수
-        Document doc = null; //
+        Document doc; //
 
         //사이트 접속(http프로토롱만 가능, https 프로토콜은 보안상 안됨)
         doc = Jsoup.connect(url).get();
@@ -83,7 +83,7 @@ public class MovieService implements IMovieService {
             //영화 순위(trim 함수 추가 이유 : trim 함수는 글자의 앞뒤 공백 삭제 역할을 수행하여,데이터 수집시,
             // 홈페이지 개발자들을 앞뒤 공백 집어넣을 수 있어서 추가)
             String rank = CmmUtil.nvl(movie_rank.next().text()).trim();  //No.1 들어옴
-            pDTO.setMovieRank(rank.substring(3, rank.length()));
+            pDTO.setMovieRank(rank.substring(3));
 
             //영화 제목
             pDTO.setMovieNm(CmmUtil.nvl(movie_name.next().text()).trim());
@@ -106,7 +106,7 @@ public class MovieService implements IMovieService {
         }
 
         // 로그 찍기(추후 찍은 로그를 통해 이 함수에 접근했는지 파악하기 용이하다.)
-        log.info(this.getClass().getName() + ".collectMovieRank End!");
+        log.info("{}.collectMovieRank End!", this.getClass().getName());
 
         return res;
     }
@@ -115,7 +115,7 @@ public class MovieService implements IMovieService {
     public List<MovieDTO> getMovieInfo() throws Exception {
 
         // 로그 찍기(추후 찍은 로그를 통해 이 함수에 접근했는지 파악하기 용이하다.)
-        log.info(this.getClass().getName() + ".getMovieInfo Start!");
+        log.info("{}.getMovieInfo Start!", this.getClass().getName());
 
         String collectTime = DateUtil.getDateTime("yyyyMMdd"); // 수집날짜 = 오늘 날짜
 
@@ -126,7 +126,7 @@ public class MovieService implements IMovieService {
         List<MovieDTO> rList = movieMapper.getMovieInfo(pDTO);
 
         // 로그 찍기(추후 찍은 로그를 통해 이 함수에 접근했는지 파악하기 용이하다.)
-        log.info(this.getClass().getName() + ".getMovieInfo End!");
+        log.info("{}.getMovieInfo End!", this.getClass().getName());
 
         return rList;
     }

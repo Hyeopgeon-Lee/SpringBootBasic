@@ -27,7 +27,7 @@ public class OcrService implements IOcrService {
     @Override
     public OcrDTO getReadforImageText(OcrDTO pDTO) throws Exception {
 
-        log.info(this.getClass().getName() + ".getReadforImageText start!");
+        log.info("{}.getReadforImageText start!", this.getClass().getName());
 
         File imageFile = new File(CmmUtil.nvl(pDTO.getFilePath()) + "//" + CmmUtil.nvl(pDTO.getFileName()));
 
@@ -48,9 +48,9 @@ public class OcrService implements IOcrService {
         // 읽은 글자를 DTO에 저장하기
         pDTO.setTextFromImage(result);
 
-        log.info("result : " + result);
+        log.info("result : {}", result);
 
-        log.info(this.getClass().getName() + ".getReadforImageText End!");
+        log.info("{}.getReadforImageText End!", this.getClass().getName());
 
         return pDTO;
     }

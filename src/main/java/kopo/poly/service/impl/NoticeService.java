@@ -23,7 +23,7 @@ public class NoticeService implements INoticeService {
     @Override
     public List<NoticeDTO> getNoticeList() throws Exception {
 
-        log.info(this.getClass().getName() + ".getNoticeList start!");
+        log.info("{}.getNoticeList start!", this.getClass().getName());
 
         return noticeMapper.getNoticeList();
 
@@ -33,7 +33,7 @@ public class NoticeService implements INoticeService {
     @Override
     public NoticeDTO getNoticeInfo(NoticeDTO pDTO, boolean type) throws Exception {
 
-        log.info(this.getClass().getName() + ".getNoticeInfo start!");
+        log.info("{}.getNoticeInfo start!", this.getClass().getName());
 
         // 상세보기할 때마다, 조회수 증가하기(수정보기는 제외)
         if (type) {
@@ -49,7 +49,7 @@ public class NoticeService implements INoticeService {
     @Override
     public void insertNoticeInfo(NoticeDTO pDTO) throws Exception {
 
-        log.info(this.getClass().getName() + ".InsertNoticeInfo start!");
+        log.info("{}.InsertNoticeInfo start!", this.getClass().getName());
 
         noticeMapper.insertNoticeInfo(pDTO);
     }
@@ -58,7 +58,7 @@ public class NoticeService implements INoticeService {
     @Override
     public void updateNoticeInfo(NoticeDTO pDTO) throws Exception {
 
-        log.info(this.getClass().getName() + ".updateNoticeInfo start!");
+        log.info("{}.updateNoticeInfo start!", this.getClass().getName());
 
         noticeMapper.updateNoticeInfo(pDTO);
 
@@ -68,7 +68,7 @@ public class NoticeService implements INoticeService {
     @Override
     public void deleteNoticeInfo(NoticeDTO pDTO) throws Exception {
 
-        log.info(this.getClass().getName() + ".deleteNoticeInfo start!");
+        log.info("{}.deleteNoticeInfo start!", this.getClass().getName());
 
         noticeMapper.deleteNoticeInfo(pDTO);
 

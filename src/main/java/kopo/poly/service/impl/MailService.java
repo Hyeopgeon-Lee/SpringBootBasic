@@ -26,7 +26,7 @@ public class MailService implements IMailService {
     public int doSendMail(MailDTO pDTO) {
 
         // 로그 찍기(추후 찍은 로그를 통해 이 함수에 접근했는지 파악하기 용이하다.)
-        log.info(this.getClass().getName() + ".doSendMail start!");
+        log.info("{}.doSendMail start!", this.getClass().getName());
 
         // 메일 발송 성공여부(발송성공 : 1 / 발송실패 : 0)
         int res = 1;
@@ -40,9 +40,9 @@ public class MailService implements IMailService {
         String title = CmmUtil.nvl(pDTO.getTitle()); // 메일제목
         String contents = CmmUtil.nvl(pDTO.getContents()); // 메일제목
 
-        log.info("toMail : " + toMail);
-        log.info("title : " + title);
-        log.info("contents : " + contents);
+        log.info("toMail : {}", toMail);
+        log.info("title : {}", title);
+        log.info("contents : {}", contents);
 
         // 메일 발송 메시지 구조(파일 첨부 가능)
         MimeMessage message = mailSender.createMimeMessage();
@@ -61,11 +61,11 @@ public class MailService implements IMailService {
 
         } catch (Exception e) {//모든 에러 다 잡기
             res = 0; // 메일 발송이 실패해기 때문에 0으로 변경
-            log.info("[ERROR] " + this.getClass().getName() + ".doSendMail : " + e);
+            log.info("[ERROR] {}.doSendMail : {}", this.getClass().getName(), e);
         }
 
         // 로그 찍기(추후 찍은 로그를 통해 이 함수 호출이 끝났는지 파악하기 용이하다.)
-        log.info(this.getClass().getName() + ".doSendMail end!");
+        log.info("{}.doSendMail end!", this.getClass().getName());
         return res;
     }
 }

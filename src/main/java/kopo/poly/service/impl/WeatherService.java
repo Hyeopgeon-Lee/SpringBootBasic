@@ -9,6 +9,7 @@ import kopo.poly.util.DateUtil;
 import kopo.poly.util.NetworkUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
@@ -23,19 +24,24 @@ public class WeatherService implements IWeatherService {
     @Value("${weather.api.key}")
     private String apiKey;
 
+    @Cacheable(
+            cacheNames = "weather",
+            key = "#pDTO.lat + '_' + #pDTO.lon",
+            unless = "#result == null"
+    )
     @Override
     public WeatherDTO getWeather(WeatherDTO pDTO) throws Exception {
 
-        log.info(this.getClass().getName() + ".getWeather Start!");
+        log.info("{}.getWeather Start!", this.getClass().getName());
 
         String lat = CmmUtil.nvl(pDTO.getLat());
         String lon = CmmUtil.nvl(pDTO.getLon());
 
         String apiParam = "?lat=" + lat + "&lon=" + lon + "&appid=" + apiKey + "&units=metric";
-        log.info("apiParam " + apiParam);
+        log.info("apiParam {}", apiParam);
 
         String json = NetworkUtil.get(IWeatherService.apiURL + apiParam);
-        log.info("json " + json);
+        log.info("json {}", json);
 
         // JSON 구조를 Map 데이터 구조로 변경하기
         // 키와 값 구조의 JSON구조로부터 데이터를 쉽게 가져오기 위해 Map 데이터구조로 변경함
@@ -45,7 +51,7 @@ public class WeatherService implements IWeatherService {
         Map<String, Double> current = (Map<String, Double>) rMap.get("current");
 
         double currnetTemp = current.get("temp"); // 현재 기온
-        log.info("현재 기온 : " + currnetTemp);
+        log.info("현재 기온 : {}", currnetTemp);
 
         // 일별 날씨 조회(OpenAPI가 현재 날짜 기준으로 최대 7일까지 제공)
         List<Map<String, Object>> dailyList = (List<Map<String, Object>>) rMap.get("daily");
@@ -63,11 +69,11 @@ public class WeatherService implements IWeatherService {
             String moonset = DateUtil.getLongDateTime(dailyMap.get("moonset")); // 달지는 시간
 
             log.info("-----------------------------------------");
-            log.info("today : " + day);
-            log.info("해뜨는 시간 : " + sunrise);
-            log.info("해지는 시간 : " + sunset);
-            log.info("달뜨는 시간 : " + moonrise);
-            log.info("달지는 시간 : " + moonset);
+            log.info("today : {}", day);
+            log.info("해뜨는 시간 : {}", sunrise);
+            log.info("해지는 시간 : {}", sunset);
+            log.info("달뜨는 시간 : {}", moonrise);
+            log.info("달지는 시간 : {}", moonset);
 
             Map<String, Double> dailyTemp = (Map<String, Double>) dailyMap.get("temp");
 
@@ -76,9 +82,9 @@ public class WeatherService implements IWeatherService {
             String dayTempMax = String.valueOf(dailyTemp.get("max")); // 최대 기온
             String dayTempMin = String.valueOf(dailyTemp.get("min")); // 최저 기온
 
-            log.info("평균 기온 : " + dayTemp);
-            log.info("최고 기온 : " + dayTempMax);
-            log.info("최저 기온 : " + dayTempMin);
+            log.info("평균 기온 : {}", dayTemp);
+            log.info("최고 기온 : {}", dayTempMax);
+            log.info("최저 기온 : {}", dayTempMin);
 
             WeatherDailyDTO wdDTO = new WeatherDailyDTO();
 
@@ -103,7 +109,7 @@ public class WeatherService implements IWeatherService {
         rDTO.setCurrentTemp(currnetTemp);
         rDTO.setDailyList(pList);
 
-        log.info(this.getClass().getName() + ".getWeather End!");
+        log.info("{}.getWeather End!", this.getClass().getName());
 
         return rDTO;
     }

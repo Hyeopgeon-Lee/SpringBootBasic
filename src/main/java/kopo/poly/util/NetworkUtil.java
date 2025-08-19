@@ -8,6 +8,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 public class NetworkUtil {
@@ -78,7 +79,7 @@ public class NetworkUtil {
             con.setRequestMethod("POST");
 
             // 전송할 헤더 값이 존재하면, 해더 값 추가하기
-            for (Map.Entry<String, String> header : requestHeaders.entrySet()) {
+            for (Map.Entry<String, String> header : Objects.requireNonNull(requestHeaders).entrySet()) {
                 con.setRequestProperty(header.getKey(), header.getValue());
             }
 

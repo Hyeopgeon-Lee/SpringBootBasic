@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @Slf4j
@@ -33,7 +34,7 @@ public class PapagoService implements IPapagoService {
         String text = CmmUtil.nvl(pDTO.getText()); // 영작할 문장
 
         // 호출할 Papago 번역 API 정보 설정
-        String param = "query=" + URLEncoder.encode(text, "UTF-8"); // 언어 감지할 문장
+        String param = "query=" + URLEncoder.encode(text, StandardCharsets.UTF_8); // 언어 감지할 문장
 
         // PapagoAPI 호출하기
         // 결과  예 : {"langCode":"ko"}

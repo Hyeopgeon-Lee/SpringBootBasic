@@ -27,11 +27,11 @@ public class UserInfoService implements IUserInfoService {
     @Override
     public UserInfoDTO getUserIdExists(UserInfoDTO pDTO) throws Exception {
 
-        log.info(this.getClass().getName() + ".getUserIdExists Start!");
+        log.info("{}.getUserIdExists Start!", this.getClass().getName());
 
         UserInfoDTO rDTO = userInfoMapper.getUserIdExists(pDTO);
 
-        log.info(this.getClass().getName() + ".getUserIdExists End!");
+        log.info("{}.getUserIdExists End!", this.getClass().getName());
 
         return rDTO;
     }
@@ -39,7 +39,7 @@ public class UserInfoService implements IUserInfoService {
     @Override
     public UserInfoDTO getEmailExists(UserInfoDTO pDTO) throws Exception {
 
-        log.info(this.getClass().getName() + ".emailAuth Start!");
+        log.info("{}.emailAuth Start!", this.getClass().getName());
 
         // DB 이메일이 존재하는지 SQL 쿼리 실행
         // SQL 쿼리에 COUNT()를 사용하기 때문에 반드시 조회 결과는 존재함
@@ -47,14 +47,14 @@ public class UserInfoService implements IUserInfoService {
 
         String existsYn = CmmUtil.nvl(rDTO.getExistsYn());
 
-        log.info("existsYn : " + existsYn);
+        log.info("existsYn : {}", existsYn);
 
         if (existsYn.equals("N")) {
 
             // 6자리 랜덤 숫자 생성하기
             int authNumber = ThreadLocalRandom.current().nextInt(100000, 1000000);
 
-            log.info("authNumber : " + authNumber);
+            log.info("authNumber : {}", authNumber);
 
             // 인증번호 발송 로직
             MailDTO dto = new MailDTO();
@@ -65,13 +65,11 @@ public class UserInfoService implements IUserInfoService {
 
             mailService.doSendMail(dto); // 이메일 발송
 
-            dto = null;
-
             rDTO.setAuthNumber(authNumber); // 인증번호를 결과값에 넣어주기
 
         }
 
-        log.info(this.getClass().getName() + ".emailAuth End!");
+        log.info("{}.emailAuth End!", this.getClass().getName());
 
         return rDTO;
     }
@@ -79,10 +77,10 @@ public class UserInfoService implements IUserInfoService {
     @Override
     public int insertUserInfo(UserInfoDTO pDTO) throws Exception {
 
-        log.info(this.getClass().getName() + ".insertUserInfo Start!");
+        log.info("{}.insertUserInfo Start!", this.getClass().getName());
 
         // 회원가입 성공 : 1, 아이디 중복으로인한 가입 취소 : 2, 기타 에러 발생 : 0
-        int res = 0;
+        int res;
 
 
         // 회원가입
@@ -122,7 +120,7 @@ public class UserInfoService implements IUserInfoService {
 
         }
 
-        log.info(this.getClass().getName() + ".insertUserInfo End!");
+        log.info("{}.insertUserInfo End!", this.getClass().getName());
 
         return res;
     }
@@ -136,7 +134,7 @@ public class UserInfoService implements IUserInfoService {
     @Override
     public UserInfoDTO getLogin(UserInfoDTO pDTO) throws Exception {
 
-        log.info(this.getClass().getName() + ".getLogin Start!");
+        log.info("{}.getLogin Start!", this.getClass().getName());
 
         // 로그인을 위해 아이디와 비밀번호가 일치하는지 확인하기 위한 mapper 호출하기
         // userInfoMapper.getUserLoginCheck(pDTO) 함수 실행 결과가 NUll 발생하면, UserInfoDTO 메모리에 올리기
@@ -149,7 +147,7 @@ public class UserInfoService implements IUserInfoService {
          * 따라서  .length() 함수를 통해 회원아이디의 글자수를 가져와 0보다 큰지 비교한다.
          * 0보다 크다면, 글자가 존재하는 것이기 때문에 값이 존재한다.
          */
-        if (CmmUtil.nvl(rDTO.getUserId()).length() > 0) {
+        if (!CmmUtil.nvl(rDTO.getUserId()).isEmpty()) {
 
             MailDTO mDTO = new MailDTO();
 
@@ -167,7 +165,7 @@ public class UserInfoService implements IUserInfoService {
 
         }
 
-        log.info(this.getClass().getName() + ".getLogin End!");
+        log.info("{}.getLogin End!", this.getClass().getName());
 
         return rDTO;
     }
@@ -175,11 +173,11 @@ public class UserInfoService implements IUserInfoService {
     @Override
     public UserInfoDTO searchUserIdOrPasswordProc(UserInfoDTO pDTO) throws Exception {
 
-        log.info(this.getClass().getName() + ".searchUserIdOrPasswordProc Start!");
+        log.info("{}.searchUserIdOrPasswordProc Start!", this.getClass().getName());
 
         UserInfoDTO rDTO = userInfoMapper.getUserId(pDTO);
 
-        log.info(this.getClass().getName() + ".searchUserIdOrPasswordProc End!");
+        log.info("{}.searchUserIdOrPasswordProc End!", this.getClass().getName());
 
         return rDTO;
     }
@@ -187,12 +185,12 @@ public class UserInfoService implements IUserInfoService {
     @Override
     public int newPasswordProc(UserInfoDTO pDTO) throws Exception {
 
-        log.info(this.getClass().getName() + ".newPasswordProc Start!");
+        log.info("{}.newPasswordProc Start!", this.getClass().getName());
 
         // 비밀번호 재설정
         int success = userInfoMapper.updatePassword(pDTO);
 
-        log.info(this.getClass().getName() + ".newPasswordProc End!");
+        log.info("{}.newPasswordProc End!", this.getClass().getName());
 
         return success;
     }
