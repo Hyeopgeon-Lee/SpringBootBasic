@@ -1,19 +1,21 @@
 package kopo.poly.config;
 
 import kopo.poly.dto.WeatherDTO;
-
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.jcache.JCacheCacheManager;     // JCache(javax.cache) → Spring Cache 어댑터
+import org.springframework.cache.interceptor.KeyGenerator;
+import org.springframework.cache.jcache.JCacheCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.cache.Caching;                                  // CachingProvider 팩토리
-import javax.cache.CacheManager;                             // JCache 표준 CacheManager
-import javax.cache.configuration.MutableConfiguration;       // 캐시 설정(키/값 타입, 저장 방식 등)
-import javax.cache.expiry.CreatedExpiryPolicy;               // 생성 시점을 기준으로 만료되는 정책
-import javax.cache.expiry.Duration;                          // 만료 기간(시간 단위)
-import javax.cache.spi.CachingProvider;                      // 구현체(Ehcache JSR-107 Provider 등)
-
+import javax.cache.CacheManager;
+import javax.cache.Caching;
+import javax.cache.configuration.MutableConfiguration;
+import javax.cache.expiry.CreatedExpiryPolicy;
+import javax.cache.expiry.Duration;
+import javax.cache.spi.CachingProvider;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -27,6 +29,27 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 @EnableCaching
 public class CacheConfig {
+
+    /**
+     * "37.5665" -> "37.567" 처럼 소수점 3자리 반올림
+     */
+    private static String round3(String s) {
+        if (s == null || s.isBlank()) return "";
+        return new BigDecimal(s).setScale(3, RoundingMode.HALF_UP).toPlainString();
+    }
+
+    @Bean
+    public KeyGenerator latLonKeyGen() {
+        return (target, method, params) -> {
+            WeatherDTO d = (WeatherDTO) params[0];
+
+            // 문자열 → BigDecimal → 소수점 3자리 반올림 → 문자열
+            String lat = round3(Optional.ofNullable(d.getLat()).orElse(""));
+            String lon = round3(Optional.ofNullable(d.getLon()).orElse(""));
+
+            return "v1:" + lat + "_" + lon + "_metric"; // 버전/단위 포함
+        };
+    }
 
     /**
      * Spring의 CacheManager 빈을 등록합니다.
@@ -62,7 +85,7 @@ public class CacheConfig {
                         .setTypes(String.class, WeatherDTO.class)
                         .setStoreByValue(false) // by reference (성능 위주, 가변 객체 주의)
                         .setExpiryPolicyFactory(CreatedExpiryPolicy.factoryOf(
-                                new Duration(TimeUnit.MINUTES, 10)  // ★ TTL = 10분 (5분 사용 시 5로 변경)
+                                new Duration(TimeUnit.MINUTES, 10)  // ★ TTL = 10분
                         ));
 
         // 4) 캐시 존재 여부 확인 후 없으면 생성

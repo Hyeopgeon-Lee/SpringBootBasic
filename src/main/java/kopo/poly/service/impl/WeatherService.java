@@ -24,11 +24,10 @@ public class WeatherService implements IWeatherService {
     @Value("${weather.api.key}")
     private String apiKey;
 
-    @Cacheable(
-            cacheNames = "weather",
-            key = "#pDTO.lat + '_' + #pDTO.lon",
-            unless = "#result == null"
-    )
+    @Cacheable(cacheNames = "weather",
+            keyGenerator = "latLonKeyGen",
+            unless = "#result == null",
+            sync = true)
     @Override
     public WeatherDTO getWeather(WeatherDTO pDTO) throws Exception {
 
