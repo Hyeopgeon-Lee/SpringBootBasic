@@ -3,9 +3,11 @@ package kopo.poly.dto;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 @Setter
 @Getter
-public class WeatherDailyDTO {
+public class WeatherDailyDTO implements Serializable {
 
     private String day; // 기준 일자
     private String sunrise; // 해뜨는 시간

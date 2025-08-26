@@ -26,10 +26,10 @@ public class WeatherService implements IWeatherService {
 
     @Cacheable(cacheNames = "weather",
             keyGenerator = "latLonKeyGen",
-            unless = "#result == null",
             sync = true)
     @Override
     public WeatherDTO getWeather(WeatherDTO pDTO) throws Exception {
+
 
         log.info("{}.getWeather Start!", this.getClass().getName());
 
