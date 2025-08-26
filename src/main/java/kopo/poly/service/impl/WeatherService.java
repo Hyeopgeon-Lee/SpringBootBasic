@@ -30,7 +30,6 @@ public class WeatherService implements IWeatherService {
     @Override
     public WeatherDTO getWeather(WeatherDTO pDTO) throws Exception {
 
-
         log.info("{}.getWeather Start!", this.getClass().getName());
 
         String lat = CmmUtil.nvl(pDTO.getLat());
