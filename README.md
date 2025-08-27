@@ -239,8 +239,6 @@ java -jar target/SpringBootBasic-0.0.1-SNAPSHOT.jar
 ## 🙋‍♀️ 문의
 - **한국폴리텍대학 서울강서캠퍼스 빅데이터소프트웨어과**  
 - **이협건 교수** · hglee67@kopo.ac.kr  
-- (홍보) 입학 상담 오픈채팅방: <https://open.kakao.com/o/gEd0JIad>
+- 입학 상담 오픈채팅방: <https://open.kakao.com/o/gEd0JIad>
 
 ---
-
-> README는 수업/시연 흐름에 맞게 **간결 + 실전 위주**로 구성했습니다. 필요 시 **Docker/K8s 배포 가이드**, **테스트 코드 예시**, **API 스펙 문서화(Swagger)** 등을 추가해 확장하세요.
