@@ -8,7 +8,7 @@
     List<NoticeDTO> rList = (List<NoticeDTO>) request.getAttribute("rList");
 %>
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>공지 리스트</title>
@@ -42,12 +42,14 @@
         %>
         <div class="divTableRow">
             <%
-                if (CmmUtil.nvl(dto.getNoticeYn()).equals("Y")) { //공지글이라면, [공지]표시
-                    out.print("<div class=\"divTableCell\">공지</div>");
-
+                if (CmmUtil.nvl(dto.getNoticeYn()).equals("Y")) {//공지글이라면, [공지]표시
+            %>
+            <div class=\"divTableCell\">공지</div>
+            <%
                 } else { //공지글이 아니라면, 글번호 보여주기
-                    out.print("<div class=\"divTableCell\">" + CmmUtil.nvl(dto.getNoticeSeq()) + "</div>");
-
+            %>
+            <div class=\"divTableCell\">" + CmmUtil.nvl(dto.getNoticeSeq()) + "</div>
+            <%
                 }
             %>
             <div class="divTableCell"

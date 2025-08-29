@@ -15,6 +15,7 @@ import javax.cache.expiry.Duration;
 import javax.cache.spi.CachingProvider;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -49,6 +50,11 @@ public class CacheConfig {
 
             return "v1:" + lat + "_" + lon + "_metric"; // 버전/단위 포함
         };
+    }
+
+    @Bean
+    public KeyGenerator noticeList() {
+        return (target, method, params) -> "v1:notice_list_metric";
     }
 
     /**
@@ -92,6 +98,18 @@ public class CacheConfig {
         //    - 동일 이름/타입의 캐시가 이미 있으면 재생성하지 않음(예외 방지)
         if (jcacheManager.getCache("weather", String.class, WeatherDTO.class) == null) {
             jcacheManager.createCache("weather", cfg);
+        }
+
+        // notice:list  (List 타입으로 생성)
+        MutableConfiguration<String, List> noticeListCfg =
+                new MutableConfiguration<String, List>()
+                        .setTypes(String.class, List.class)
+                        .setStoreByValue(false) // 참조 저장: 반환 객체 변형 주의
+                        .setExpiryPolicyFactory(CreatedExpiryPolicy.factoryOf(
+                                new Duration(TimeUnit.SECONDS, 60)));
+
+        if (jcacheManager.getCache("notice:list", String.class, List.class) == null) {
+            jcacheManager.createCache("notice:list", noticeListCfg);
         }
 
         // 5) 스프링 캐시 추상화 어댑터로 감싸서 반환
