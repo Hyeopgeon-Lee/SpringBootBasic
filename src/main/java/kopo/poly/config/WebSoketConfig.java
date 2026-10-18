@@ -29,7 +29,6 @@ public class WebSoketConfig implements WebSocketConfigurer {
         log.info("WebSocket Execute!!!");
 
         registry.addHandler(chatHandler, "/ws/*/*/*")
-                .setAllowedOrigins("*")
                 .addInterceptors(
                         new HttpSessionHandshakeInterceptor() {
 
@@ -39,7 +38,7 @@ public class WebSoketConfig implements WebSocketConfigurer {
                                     throws Exception {
 
                                 String path = CmmUtil.nvl(request.getURI().getPath());
-                                log.info("path : " + path);
+                                // Avoid logging user-controlled room identifiers.
 
                                 String[] urlInfo = path.split("/");
 
