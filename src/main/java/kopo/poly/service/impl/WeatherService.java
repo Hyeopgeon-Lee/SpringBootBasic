@@ -1,6 +1,6 @@
 package kopo.poly.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import kopo.poly.dto.WeatherDTO;
 import kopo.poly.dto.WeatherDailyDTO;
 import kopo.poly.service.IWeatherService;
@@ -36,19 +36,19 @@ public class WeatherService implements IWeatherService {
         String lon = CmmUtil.nvl(pDTO.getLon());
 
         String apiParam = "?lat=" + lat + "&lon=" + lon + "&appid=" + apiKey + "&units=metric";
-        log.info("apiParam {}", apiParam);
+        // API 키를 포함한 URL은 기록하지 않는다.
 
         String json = NetworkUtil.get(IWeatherService.apiURL + apiParam);
-        log.info("json {}", json);
+        // 원시 응답 본문에는 개인/인증 정보가 있을 수 있으므로 로그에 기록하지 않는다.
 
         // JSON 구조를 Map 데이터 구조로 변경하기
         // 키와 값 구조의 JSON구조로부터 데이터를 쉽게 가져오기 위해 Map 데이터구조로 변경함
         Map<String, Object> rMap = new ObjectMapper().readValue(json, LinkedHashMap.class);
 
         // 현재 날씨 정보를 가지고 있는 current 키의 값 가져오기
-        Map<String, Double> current = (Map<String, Double>) rMap.get("current");
+        Map<String, Object> current = (Map<String, Object>) rMap.get("current");
 
-        double currnetTemp = current.get("temp"); // 현재 기온
+        double currnetTemp = ((Number) current.get("temp")).doubleValue(); // 현재 기온
         log.info("현재 기온 : {}", currnetTemp);
 
         // 일별 날씨 조회(OpenAPI가 현재 날짜 기준으로 최대 7일까지 제공)
@@ -73,7 +73,7 @@ public class WeatherService implements IWeatherService {
             log.info("달뜨는 시간 : {}", moonrise);
             log.info("달지는 시간 : {}", moonset);
 
-            Map<String, Double> dailyTemp = (Map<String, Double>) dailyMap.get("temp");
+            Map<String, Object> dailyTemp = (Map<String, Object>) dailyMap.get("temp");
 
             // 숫자형태보다 문자열 형태가 데이터처리하기 쉽기 때문에 Double형태를 문자열로 변경함
             String dayTemp = String.valueOf(dailyTemp.get("day")); // 평균 기온
