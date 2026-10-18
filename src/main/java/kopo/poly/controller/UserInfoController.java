@@ -2,6 +2,10 @@ package kopo.poly.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import java.time.Instant;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.Locale;
 import kopo.poly.dto.MsgDTO;
 import kopo.poly.dto.UserInfoDTO;
 import kopo.poly.service.IUserInfoService;
@@ -66,7 +70,7 @@ public class UserInfoController {
      */
     @ResponseBody
     @PostMapping(value = "getEmailExists")
-    public UserInfoDTO getEmailExists(HttpServletRequest request) throws Exception {
+    public UserInfoDTO getEmailExists(HttpServletRequest request, HttpSession session) throws Exception {
 
         log.info(this.getClass().getName() + ".getEmailExists Start!");
 
@@ -80,6 +84,16 @@ public class UserInfoController {
         // 입력된 이메일이 중복된 이메일인지 조회
         UserInfoDTO rDTO = Optional.ofNullable(userInfoService.getEmailExists(pDTO)).orElseGet(UserInfoDTO::new);
 
+        // 인증번호는 클라이언트에 노출하지 않고 서버 세션에서 10분 동안 검증한다.
+        clearEmailVerification(session);
+        if ("N".equals(rDTO.getExistsYn()) && rDTO.getAuthNumber() >= 100000) {
+            session.setAttribute("EMAIL_VERIFY_ADDR", email.trim().toLowerCase(Locale.ROOT));
+            session.setAttribute("EMAIL_VERIFY_CODE", Integer.toString(rDTO.getAuthNumber()));
+            session.setAttribute("EMAIL_VERIFY_EXPIRES", Instant.now().plusSeconds(600).toEpochMilli());
+            session.setAttribute("EMAIL_VERIFY_ATTEMPTS", 0);
+        }
+        rDTO.setAuthNumber(0); // JSON에 실제 인증번호를 노출하지 않는다.
+
         log.info(this.getClass().getName() + ".getEmailExists End!");
 
         return rDTO;
@@ -91,6 +105,15 @@ public class UserInfoController {
     @ResponseBody
     @PostMapping(value = "insertUserInfo")
     public MsgDTO insertUserInfo(HttpServletRequest request) throws Exception {
+        HttpSession verifySession = request.getSession(false);
+        String requestedEmail = CmmUtil.nvl(request.getParameter("email")).trim().toLowerCase(Locale.ROOT);
+        String submittedCode = CmmUtil.nvl(request.getParameter("authNumber")).trim();
+        if (!isVerifiedEmail(verifySession, requestedEmail, submittedCode)) {
+            MsgDTO invalid = new MsgDTO();
+            invalid.setResult(0);
+            invalid.setMsg("이메일 인증번호가 유효하지 않거나 만료되었습니다. 인증번호를 다시 발급받으세요.");
+            return invalid;
+        }
 
         log.info(this.getClass().getName() + ".insertUserInfo start!");
 
@@ -178,6 +201,7 @@ public class UserInfoController {
             log.info("회원가입 결과(res) : " + res);
 
             if (res == 1) {
+                clearEmailVerification(verifySession);
                 msg = "회원가입되었습니다.";
 
                 //추후 회원가입 입력화면에서 ajax를 활용해서 아이디 중복, 이메일 중복을 체크하길 바람
@@ -536,4 +560,33 @@ public class UserInfoController {
         return "user/newPasswordResult";
 
     }
+    private static boolean isVerifiedEmail(HttpSession session, String email, String code) {
+        if (session == null || email.isBlank() || code.isBlank()) return false;
+        Object value = session.getAttribute("EMAIL_VERIFY_EXPIRES");
+        Object attempts = session.getAttribute("EMAIL_VERIFY_ATTEMPTS");
+        if (!(value instanceof Long expiry) || Instant.now().toEpochMilli() > expiry) {
+            clearEmailVerification(session);
+            return false;
+        }
+        int tries = attempts instanceof Integer count ? count : 0;
+        if (tries >= 5) {
+            clearEmailVerification(session);
+            return false;
+        }
+        session.setAttribute("EMAIL_VERIFY_ATTEMPTS", tries + 1);
+        String expectedEmail = CmmUtil.nvl((String) session.getAttribute("EMAIL_VERIFY_ADDR"));
+        String expectedCode = CmmUtil.nvl((String) session.getAttribute("EMAIL_VERIFY_CODE"));
+        boolean match = MessageDigest.isEqual(expectedCode.getBytes(StandardCharsets.UTF_8),
+                code.getBytes(StandardCharsets.UTF_8));
+        return match && expectedEmail.equals(email);
+    }
+
+    private static void clearEmailVerification(HttpSession session) {
+        if (session == null) return;
+        session.removeAttribute("EMAIL_VERIFY_ADDR");
+        session.removeAttribute("EMAIL_VERIFY_CODE");
+        session.removeAttribute("EMAIL_VERIFY_EXPIRES");
+        session.removeAttribute("EMAIL_VERIFY_ATTEMPTS");
+    }
+
 }
