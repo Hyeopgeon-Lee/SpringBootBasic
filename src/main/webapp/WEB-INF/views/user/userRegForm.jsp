@@ -13,7 +13,7 @@
         let userIdCheck = "Y";
 
         // 이메일 중복체크 인증번호 발송 값
-        let emailAuthNumber = "";
+        // 이메일 인증번호는 서버 세션에서 검증합니다.
 
         // HTML로딩이 완료되고, 실행됨
         $(document).ready(function () {
@@ -97,7 +97,7 @@
 
                         } else {
                             alert("이메일로 인증번호가 발송되었습니다. \n받은 메일의 인증번호를 입력하기 바랍니다.");
-                            emailAuthNumber = json.authNumber;
+                            // 보안상 인증번호는 응답에 포함되지 않습니다.
 
                         }
 
@@ -173,11 +173,6 @@
                 return;
             }
 
-            if (f.authNumber.value != emailAuthNumber) {
-                alert("이메일 인증번호가 일치하지 않습니다.");
-                f.authNumber.focus();
-                return;
-            }
 
             if (f.addr1.value === "") {
                 alert("주소를 입력하세요.");

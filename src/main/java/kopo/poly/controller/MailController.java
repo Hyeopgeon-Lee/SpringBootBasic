@@ -1,6 +1,9 @@
 package kopo.poly.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import kopo.poly.dto.MailDTO;
 import kopo.poly.dto.MsgDTO;
 import kopo.poly.service.IMailService;
@@ -27,7 +30,8 @@ public class MailController {
      * 메일 발송하기폼
      */
     @GetMapping(value = "mailForm")
-    public String mailForm() throws Exception {
+    public String mailForm(HttpSession session) throws Exception {
+        requireLogin(session);
 
         // 로그 찍기(추후 찍은 로그를 통해 이 함수에 접근했는지 파악하기 용이하다.)
         log.info(this.getClass().getName() + "mailForm Start!");
@@ -40,7 +44,8 @@ public class MailController {
      */
     @ResponseBody
     @PostMapping(value = "sendMail")
-    public MsgDTO sendMail(HttpServletRequest request, ModelMap model) throws Exception {
+    public MsgDTO sendMail(HttpServletRequest request, HttpSession session) throws Exception {
+        requireLogin(session);
 
         // 로그 찍기(추후 찍은 로그를 통해 이 함수에 접근했는지 파악하기 용이하다.)
         log.info(this.getClass().getName() + ".sendMail Start!");
@@ -57,9 +62,14 @@ public class MailController {
          * 반드시, 값을 받았으면, 꼭 로그를 찍어서 값이 제대로 들어오는지 파악해야함 반드시 작성할 것
          * ####################################################################################
          */
-        log.info("toMail : " + toMail);
-        log.info("title : " + title);
-        log.info("contents : " + contents);
+
+        // 개인정보와 메일 본문은 로그에 남기지 않는다.
+
+
+        // 개인정보와 메일 본문은 로그에 남기지 않는다.
+
+
+        // 개인정보와 메일 본문은 로그에 남기지 않는다.
 
         // 메일 발송할 정보 넣기 위한 DTO객체 생성하기
         MailDTO pDTO = new MailDTO();
@@ -83,12 +93,19 @@ public class MailController {
 
         // 결과 메시지 전달하기
         MsgDTO dto = new MsgDTO();
+        dto.setResult(res);
         dto.setMsg(msg);
 
         // 로그 찍기(추후 찍은 로그를 통해 이 함수 호출이 끝났는지 파악하기 용이하다.)
         log.info(this.getClass().getName() + ".sendMail End!");
 
         return dto;
+    }
+    private static void requireLogin(HttpSession session) {
+        Object userId = session.getAttribute("SS_USER_ID");
+        if (!(userId instanceof String id) || id.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "로그인이 필요합니다.");
+        }
     }
 }
 

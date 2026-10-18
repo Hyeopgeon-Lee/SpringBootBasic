@@ -87,7 +87,7 @@ public class PapagoService implements IPapagoService {
 
         } else {
             // 한국어와 영어가 아니면, 에러 발생시키기
-            new Exception("한국어와 영어만 번역됩닌다.");
+            throw new IllegalArgumentException("한국어와 영어만 번역할 수 있습니다.");
         }
 
         String text = CmmUtil.nvl(pDTO.getText()); // 번역할 문장

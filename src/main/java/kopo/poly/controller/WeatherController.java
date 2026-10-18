@@ -7,6 +7,8 @@ import kopo.poly.util.CmmUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,6 +30,9 @@ public class WeatherController {
         String lat = CmmUtil.nvl(request.getParameter("lat")); // 자바스크립트로부터 받은 위, 경도 값
         String lon = CmmUtil.nvl(request.getParameter("lon")); // 자바스크립트로부터 받은 위, 경도 값
 
+        validateCoordinate(lat, -90, 90, "lat");
+        validateCoordinate(lon, -180, 180, "lon");
+
         WeatherDTO pDTO = new WeatherDTO();
         pDTO.setLat(lat);
         pDTO.setLon(lon);
@@ -44,5 +49,15 @@ public class WeatherController {
         log.info(this.getClass().getName() + ".getWeather End!");
 
         return rDTO;
+    }
+    private static void validateCoordinate(String value, double min, double max, String parameter) {
+        try {
+            double number = Double.parseDouble(value);
+            if (Double.isFinite(number) && number >= min && number <= max) return;
+        } catch (NumberFormatException ignored) {
+            // Invalid coordinates are reported as HTTP 400.
+        }
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                parameter + " must be a valid coordinate");
     }
 }

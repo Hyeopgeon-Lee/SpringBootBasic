@@ -1,0 +1,19 @@
+name: Spring Boot 4 Maven verification
+on:
+  push:
+  pull_request:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up Java 17
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+      - name: Compile, unit test and package WAR
+        run: bash ./mvnw -B -ntp clean verify
