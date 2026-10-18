@@ -1,244 +1,116 @@
-# 🌱 SpringBootBasic
+# SpringBootBasic
 
-**Spring Boot 3.4.5 · Java 17** 기반의 교육/실습용 프로젝트입니다. MVC, MyBatis, Ehcache(JCache), WebSocket 채팅, Naver Papago 번역(Feign), OpenWeatherMap 연동, Tess4J(OCR), 메일 발송 등을 한 프로젝트에서 단계적으로 실습할 수 있도록 구성했습니다.
+Spring Boot **4.1.1** / Java **17** 교육용 프로젝트입니다.
 
-<p align="left">
-  <img alt="java" src="https://img.shields.io/badge/Java-17-007396?logo=openjdk&logoColor=white">
-  <img alt="spring-boot" src="https://img.shields.io/badge/Spring%20Boot-3.4.5-6DB33F?logo=springboot&logoColor=white">
-  <img alt="build" src="https://img.shields.io/badge/Build-Maven%203.9+-C71A36?logo=apachemaven&logoColor=white">
-  <img alt="license" src="https://img.shields.io/badge/License-Apache--2.0-blue">
-</p>
+JSP + Spring MVC, MyBatis + MariaDB, Ehcache JCache, OpenFeign/Papago,
+OpenWeatherMap, WebSocket 채팅, Tess4J OCR, SMTP 메일 발송을 실습합니다.
 
----
+## 기술 스택
 
-## ✨ 주요 기능
-- **공지게시판(Notice)**: 목록/등록/수정/삭제, 조회수
-- **회원(User)**: 가입/로그인/아이디·비밀번호 찾기
-- **메일 발송**: Naver SMTP 기반 단순 메일 전송
-- **Papago 번역/언어감지**: Spring Cloud OpenFeign + `NaverApiConfig`
-- **날씨(OpenWeatherMap)**: One Call 3.0 API, **Ehcache 캐시** 적용
-- **OCR**: Tess4J(5.x) 기반 이미지 텍스트 추출
-- **웹소켓 채팅**: `/ws/*/*/*` 핸들러, 다국어 번역 채팅 예제 포함
-- **크롤링 예제**: 일일 식단, 영화 랭킹 수집 등 (Jsoup)
+| 구성 요소 | 버전 / 방식 |
+| --- | --- |
+| Spring Boot | 4.1.1 |
+| Java | 17 |
+| Spring Cloud | 2025.1.3 (OpenFeign) |
+| MyBatis Spring Boot Starter | 4.1.0 |
+| Spring MVC | `spring-boot-starter-webmvc` |
+| 화면 | JSP/JSTL (WAR 패키징) |
+| DB | MariaDB JDBC, MyBatis |
+| Cache | Ehcache 3 + JCache, `@Cacheable` |
+| JSON | Jackson 3 (`tools.jackson.databind.ObjectMapper`) |
+| OCR | Tess4J |
 
-> ⚠️ 수업 예제로 제공되는 코드이므로 보안/예외처리/운영모드 최적화가 최소화되어 있습니다. 실제 서비스 시 **보안, 비밀키 외부화, SQL 호환성** 등을 반드시 검토하세요.
+## 시작하기
 
----
+Java 17, Maven Wrapper, MariaDB를 준비합니다. `sql/` 및 `src/main/resources/mapper/` 내에서 해당 실습에 필요한 SQL 스키마를 확인하고 생성해야 합니다.
 
-## 🧱 기술 스택
-- **Spring Boot**: Web, Cache(JCache), WebSocket, Mail
-- **Spring Cloud OpenFeign** (2024.0.2 BOM)
-- **MyBatis**
-- **DB**: MariaDB (예제), *일부 Mapper는 Oracle 함수 사용 주석 존재*
-- **Cache**: Ehcache 3 (JCache 표준 API)
-- **OCR**: Tess4J 5.6.0
-- **크롤링**: Jsoup 1.18.x
-- **기타**: Lombok, Commons-IO
-
----
-
-## 📁 프로젝트 구조(요약)
-```
-SpringBootBasic/
-├─ src/main/java/kopo/poly/
-│  ├─ controller/      # REST & MVC 컨트롤러 (Notice, User, Mail, Weather, Papago, OCR, Chat 등)
-│  ├─ service/         # 서비스 인터페이스
-│  │  └─ impl/         # 서비스 구현체 (WeatherService 등)
-│  ├─ mapper/          # MyBatis 매퍼 인터페이스
-│  ├─ config/          # CacheConfig, NaverApiConfig, WebSoketConfig
-│  ├─ dto/             # DTO 클래스들 (UserInfoDTO, WeatherDTO 등)
-│  ├─ util/            # 유틸리티 (EncryptUtil, NetworkUtil, DateUtil 등)
-│  └─ chat/            # WebSocket ChatHandler
-├─ src/main/resources/
-│  ├─ application.properties
-│  ├─ logback.xml
-│  ├─ mapper/*.xml     # MyBatis SQL 매퍼
-│  └─ static/
-│     ├─ html/         # 데모 페이지 (translate.html, detect_lang.html, today_weather.html)
-│     └─ css|js
-├─ pom.xml, mvnw, LICENSE, README.md
-```
-
----
-
-## ⚙️ 빠른 시작
-### 1) 필수 요건
-- **JDK 17**
-- **Maven 3.9+** (동봉된 `mvnw` 사용 권장)
-- **MariaDB 10.x+** (또는 Oracle 사용 시 Mapper SQL 호환성 조정 필요)
-
-### 2) DB 준비 (MariaDB 예시)
-```sql
-CREATE DATABASE myDB DEFAULT CHARACTER SET utf8mb4;
-CREATE USER 'poly'@'%' IDENTIFIED BY '강력한_비밀번호';
-GRANT ALL PRIVILEGES ON myDB.* TO 'poly'@'%';
-FLUSH PRIVILEGES;
-```
-
-### 3) 환경설정
-> **중요**: 민감정보(KEY, 비밀번호)는 Git에 올리지 마세요. 로컬/서버 환경 변수나 `application-local.properties` 등으로 분리하세요.
-
-`src/main/resources/application.properties` 예시(가이드):
-```properties
-# Server
-server.port=11000
-
-# MariaDB (URL 표기 주의: // 필요)
-spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
-spring.datasource.url=jdbc:mariadb://127.0.0.1:3306/myDB
-spring.datasource.username=poly
-spring.datasource.password=********
-
-# Mail (Naver SMTP 예시)
-spring.mail.host=smtp.naver.com
-spring.mail.port=465
-spring.mail.username=<YOUR_NAVER_EMAIL>
-spring.mail.password=<YOUR_NAVER_APP_PASSWORD>
-spring.mail.default-encoding=UTF-8
-spring.mail.properties.mail.smtp.auth=true
-spring.mail.properties.mail.smtp.starttls.enable=true
-spring.mail.properties.mail.smtp.ssl.enable=true
-spring.mail.properties.mail.smtp.ssl.trust=smtp.naver.com
-
-# OCR
-ocr.model.data=/path/to/tessdata   # (프로젝트 내 프로퍼티 키는 orc.model.data 로 되어 있어 수정 권장)
-
-# OpenWeatherMap
-weather.api.key=<YOUR_OPENWEATHERMAP_API_KEY>
-
-# Naver Papago
-naver.papago.clientId=<YOUR_NAVER_CLIENT_ID>
-naver.papago.clientSecret=<YOUR_NAVER_CLIENT_SECRET>
-
-# 캐시 로그(필요 시)
-logging.level.org.springframework.cache=TRACE
-logging.level.org.springframework.cache.interceptor=TRACE
-```
-
-환경 분리를 원하면 프로필로 `application-local.properties` 를 만들고 실행 시 `--spring.profiles.active=local` 을 지정하세요.
-
-### 4) 실행
 ```bash
-# 1) 의존성 설치 및 실행
+# Linux / macOS
+export DB_URL='jdbc:mariadb://localhost:3306/myDB'
+export DB_USERNAME='poly'
+export DB_PASSWORD='YOUR_DB_PASSWORD'
+export MAIL_USERNAME='YOUR_MAIL_ACCOUNT'
+export MAIL_PASSWORD='YOUR_MAIL_PASSWORD'
+export WEATHER_API_KEY='YOUR_WEATHER_API_KEY'
+export NAVER_CLIENT_ID='YOUR_CLIENT_ID'
+export NAVER_CLIENT_SECRET='YOUR_CLIENT_SECRET'
+export OCR_MODEL_DATA='/absolute/path/to/tessdata'
+export OCR_UPLOAD_DIR='/tmp/springbootbasic-ocr'
+
+./mvnw -B -ntp clean verify
 ./mvnw spring-boot:run
-# 또는 패키징 후 실행
-./mvnw -DskipTests package
-java -jar target/SpringBootBasic-0.0.1-SNAPSHOT.jar
 ```
 
-서버가 기동되면 기본 포트 `http://localhost:11000` 으로 접근합니다.
+Windows PowerShell에서는 `$env:DB_PASSWORD = "..." ` 형식으로 환경변수를 설정할 수 있습니다.
 
----
+설정 파일 `src/main/resources/application.properties`에는 더 이상 실사용 비밀번호나 API 키를 포함하지 않습니다.
 
-## 🧪 빠른 점검(Quick Smoke Test)
-### REST 엔드포인트
-- **날씨**
-  ```bash
-  curl "http://localhost:11000/weather/getWeather?lat=37.5665&lon=126.9780"
-  ```
-- **Papago 언어감지**
-  ```bash
-  curl -X POST http://localhost:11000/papago/detectLangs        -d "text=안녕하세요. 반갑습니다"
-  ```
-- **Papago 번역** (한국어→영어)
-  ```bash
-  curl -X POST http://localhost:11000/papago/translate        -d "source=ko" -d "target=en" -d "text=안녕하세요"
-  ```
-- **메일 발송**
-  ```bash
-  curl -X POST http://localhost:11000/mail/sendMail        -d "toMail=receiver@example.com"        -d "title=테스트" -d "contents=본문입니다"
-  ```
-- **OCR 업로드 폼**: `GET /ocr/uploadImage` (업로드 필드명: `fileUpload`)
+| 환경변수 | 용도 |
+| --- | --- |
+| `SERVER_PORT` | HTTP 포트 (기본 11000) |
+| `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | MariaDB JDBC 연결 |
+| `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD` | SMTP |
+| `WEATHER_API_KEY` | OpenWeatherMap |
+| `NAVER_CLIENT_ID`, `NAVER_CLIENT_SECRET` | Papago |
+| `OCR_MODEL_DATA` | Tess4J 학습 데이터 폴더 |
+| `OCR_UPLOAD_DIR` | OCR 임시 업로드 폴더 |
+| `APP_AES_KEY` | 기존 이메일 암호문 호환용 AES-128 키 (UTF-8 정확히 16바이트) |
 
-### 데모 페이지(정적)
-- 번역: `http://localhost:11000/html/translate.html`
-- 언어감지: `http://localhost:11000/html/detect_lang.html`
-- 오늘의 날씨: `http://localhost:11000/html/today_weather.html`
+### 기존 데이터의 AES 키 관련 주의
 
----
+기존 코드에는 고정된 AES-CBC 키와 IV가 포함되어 있었습니다.
+수정본은 AES 키를 `APP_AES_KEY` 환경변수에서 읽으며, 값을 설정하지 않은 경우
+이메일 암·복호화가 필요한 기능이 명확한 오류를 반환합니다.
+**기존에 저장된 이메일은 기존 암호화 키가 없으면 복호화할 수 없습니다.**
+운영 데이터를 유지해야 한다면 관리자가 비밀키를 안전하게 확보하고, 데이터를 인증된 암호화 방식으로 별도 마이그레이션해야 합니다.
+현재 예제의 AES-CBC 고정 IV 및 비밀번호의 SHA-256 해시는 **운영용 보안 구현이 아닙니다**.
 
-## 🔌 WebSocket 채팅
-- 핸들러 등록: `WebSoketConfig` → `addHandler(chatHandler, "/ws/*/*/*")`
-- 세션 속성: `roomName`, `userName`, `roomNameHash`, `langCode`
-- 샘플 화면 라우팅: `/chat/intro`, `/chat/chatroom`, `/global/intro` 등
+## 주요 학습 기능
 
-> 프런트엔드는 수업 중 실습용 화면을 사용합니다. 실제 사용 시 클라이언트(JS)에서 `new WebSocket("ws://HOST:11000/ws/{room}/{user}/{lang}")` 형태로 연결하세요.
+- 공지사항: `/notice/noticeList` 목록/등록/수정/삭제, MyBatis 및 캐시
+- 회원: `/user/userRegForm`, `/user/login`, 이메일 인증 예제
+- 이메일 발송: `/mail/mailForm`, `/mail/sendMail` (로그인 세션 필요)
+- 날씨: `GET /weather/getWeather?lat=37.5665&lon=126.9780`
+- Papago: `POST /papago/detectLangs`, `POST /papago/translate`
+- OCR: `GET /ocr/uploadImage`, `POST /ocr/readImage` (최대 5MB)
+- WebSocket 채팅: `/ws/{room}/{user}/{language}`
+- HTML 예제: `/html/translate.html`, `/html/detect_lang.html`, `/html/today_weather.html`
 
----
+OCR은 `OCR_MODEL_DATA` 디렉터리에 `kor.traineddata`가 필요합니다.
+임시 업로드 파일은 이미지 검증과 OCR 처리 후 삭제합니다.
 
-## 🧊 캐시(Ehcache JCache)
-- `@EnableCaching` + `JCacheCacheManager`
-- 캐시명: `weather` (기본 TTL 예: 10분)
-- **KeyGenerator**: 위·경도 문자열을 **소수점 3자리 반올림**해 캐시 키 생성 → 근접 좌표 요청 캐시 히트율 향상
-- 적용 메서드 예: `WeatherService#getWeather(... )` 에 `@Cacheable(cacheNames = "weather", key = ...)`
+### Spring Boot 4 전환 시 변경 내용
 
-> 캐시 동작 로그가 필요하면 위 `logging.level` 설정을 TRACE 로 두고 확인하세요.
+- Spring MVC 전용 스타터, Spring Cloud 2025.1.x, MyBatis 4.x 사용
+- Java 코드에서 Jackson 2의 `com.fasterxml.jackson.databind.ObjectMapper`를 Jackson 3 API로 변경
+- 날씨 좌표 유효성 검사, 유닉스 타임스탬프 `Long` 처리 보완
+- 민감한 비밀번호·API 응답·메일 본문 로그 제거
+- 메일 발송 엔드포인트 접근 시 로그인 검사
+- 회원가입 이메일 6자리 인증번호를 JSON으로 반환하지 않고 서버 세션에서 확인 (유효기간 10분, 최대 5회 검사)
+- WebSocket의 모든 Origin 허용 제거, 접속자 목록 스냅샷 순회
+- OCR 임시 파일의 고유 파일명과 삭제 처리
+- GitHub Actions에서 Java 17 / Maven `clean verify` 검증
 
----
+## 테스트
 
-## 🗺️ API 엔드포인트 요약
-> 주요 컨트롤러 기준 (세부 파라미터는 각 컨트롤러 참고)
+```bash
+./mvnw -B -ntp clean verify
+```
 
-| 모듈 | 메서드 | 경로 |
-|---|---|---|
-| Chat | GET  | `/chat/intro` |
-| Chat | POST | `/chat/chatroom` |
-| GlobalChat | GET  | `/global/intro` |
-| GlobalChat | POST | `/global/chatroom` |
-| Notice | GET  | `/notice/noticeList` |
-| Notice | GET  | `/notice/noticeReg` |
-| Notice | POST | `/notice/noticeInsert` |
-| Notice | GET  | `/notice/noticeInfo` |
-| Notice | GET  | `/notice/noticeEditInfo` |
-| Notice | POST | `/notice/noticeUpdate` |
-| Notice | POST | `/notice/noticeDelete` |
-| User | GET  | `/user/userRegForm` |
-| User | POST | `/user/getUserIdExists` |
-| User | POST | `/user/getEmailExists` |
-| User | POST | `/user/insertUserInfo` |
-| User | GET  | `/user/login` |
-| User | POST | `/user/loginProc` |
-| User | GET  | `/user/loginResult` |
-| User | GET  | `/user/searchUserId` |
-| User | POST | `/user/searchUserIdProc` |
-| User | GET  | `/user/searchPassword` |
-| User | POST | `/user/searchPasswordProc` |
-| User | POST | `/user/newPasswordProc` |
-| Mail | GET  | `/mail/mailForm` |
-| Mail | POST | `/mail/sendMail` |
-| Weather | GET  | `/weather/getWeather` |
-| OCR | GET  | `/ocr/uploadImage` |
-| OCR | POST | `/ocr/readImage` |
-| Movie | GET  | `/movie/collectMovieRank` |
-| Movie | GET  | `/movie/getMovieRank` |
-| Papago | POST | `/papago/detectLangs` |
-| Papago | POST | `/papago/translate` |
+`/.github/workflows/maven.yml`에서 Pull Request 및 push 시 컴파일, 단위 테스트, WAR 패키징을 검증합니다.
+GitHub Actions에서 실제 DB, SMTP, OCR 모델, Papago 및 Weather API를 제공하지 않으므로,
+**외부 서비스 호출·DB CRUD·JSP 렌더링은 별도의 통합 테스트가 필요합니다.**
 
----
+## 반드시 알아둘 보안 제한
 
-## ⚠️ 주의/메모
-- `application.properties` 의 **DB URL** 은 `jdbc:mariadb://...` (**`//` 포함**) 형식을 사용하세요.
-- 일부 `mapper/*.xml` 은 예제로 **Oracle 함수(예: `TO_CHAR`)** 사용 부분이 있으므로, MariaDB 사용 시 SQL을 변환해야 합니다.
-- 메일/외부 API 키는 **반드시 외부화**하고, 깃 저장소에 올리지 마세요.
-- 운영 반영 전 **입력값 검증, 예외 처리, 인증/권한(Spring Security)** 등을 강화해야 합니다.
+이 프로젝트는 보안·인증 프레임워크 구현을 완료한 운영 서비스가 아니라 **교육용 실습 저장소**입니다.
 
----
+1. 기존 저장소의 Git 이력에도 과거 DB·SMTP 계정과 외부 API 인증정보가 남아 있을 수 있습니다.
+   설정 파일에서 제거했더라도 노출된 실제 인증정보는 즉시 폐기·재발급해야 합니다.
+2. 고정 IV 기반 기존 AES-CBC 이메일 암호화와 단순 SHA-256 비밀번호 저장은
+   운영 환경에 적합하지 않습니다. BCrypt/Argon2 등으로 **기존 데이터 마이그레이션**을 계획해야 합니다.
+3. 비밀번호 재설정 흐름은 서버 측 사용자 존재 확인을 강화했으나,
+   **별도의 이메일 토큰 인증, CSRF 방어, 요청 제한을 추가하기 전에는 외부 배포해서는 안 됩니다.**
+4. WebSocket 채팅 및 게시판의 세밀한 사용자별 권한 검사는 별도 실습으로 구현해야 합니다.
 
-## 🧑‍💻 로컬 개발 팁
-- 롬복이 동작하지 않으면 IDE(인텔리J) 플러그인을 설치하고 **Annotation Processing** 을 켜세요.
-- 프로필 분리: `application-local.properties` + `--spring.profiles.active=local`
-- 로그 설정: `logback.xml` 에서 레벨 조정
-
----
-
-## 📜 라이선스
-- 본 저장소는 **Apache-2.0** 라이선스를 따릅니다. 자세한 내용은 [LICENSE](./LICENSE) 를 참고하세요.
-
----
-
-## 🙋‍♀️ 문의
-- **한국폴리텍대학 서울강서캠퍼스 빅데이터소프트웨어과**  
-- **이협건 교수** · hglee67@kopo.ac.kr  
-- 입학 상담 오픈채팅방: <https://open.kakao.com/o/gEd0JIad>
-
----
+라이선스: [Apache License 2.0](LICENSE).
