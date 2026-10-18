@@ -1,6 +1,6 @@
 package kopo.poly.chat;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import kopo.poly.dto.ChatDTO;
 import kopo.poly.dto.PapagoDTO;
 import kopo.poly.service.IPapagoService;
