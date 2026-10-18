@@ -38,7 +38,8 @@ public final class NetworkUtil {
             connection.setReadTimeout(10000);
             connection.setRequestMethod(method);
             if (headers != null) {
-                headers.forEach(connection::setRequestProperty);
+                HttpURLConnection target = connection;
+                headers.forEach(target::setRequestProperty);
             }
             if ("POST".equals(method)) {
                 connection.setDoOutput(true);
