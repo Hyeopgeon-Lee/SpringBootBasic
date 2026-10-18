@@ -85,7 +85,7 @@ public class ChatHandler extends TextWebSocketHandler {
         log.info("json : " + json);
 
         // 웹소켓에 접속된 모든 사용자 검색
-        clients.forEach(s -> {
+        snapshotClients().forEach(s -> {
 
             // 내가 접속한 채팅방에 있는 세션만 메시지 보내기
             if (roomNameHash.equals(s.getAttributes().get("roomNameHash"))) {
@@ -125,7 +125,7 @@ public class ChatHandler extends TextWebSocketHandler {
         log.info("roomNameHash : " + roomNameHash);
 
         // 웹소켓에 접속된 모든 사용자 검색
-        clients.forEach(s -> {
+        snapshotClients().forEach(s -> {
 
             // 내가 접속한 채팅방에 있는 세션만 메시지 보내기
             if (roomNameHash.equals(s.getAttributes().get("roomNameHash"))) {
@@ -189,7 +189,7 @@ public class ChatHandler extends TextWebSocketHandler {
         clients.remove(session); // 접속되어있는 세션 삭제
 
         // 웹소켓에 접속된 모든 사용자 검색
-        clients.forEach(s -> {
+        snapshotClients().forEach(s -> {
 
             // 내가 접속한 채팅방에 있는 세션만 메시지 보내기
             if (roomNameHash.equals(s.getAttributes().get("roomNameHash"))) {
@@ -216,5 +216,10 @@ public class ChatHandler extends TextWebSocketHandler {
         });
 
         log.info(this.getClass().getName() + ".afterConnectionClosed End!");
+    }
+    private static List<WebSocketSession> snapshotClients() {
+        synchronized (clients) {
+            return List.copyOf(clients);
+        }
     }
 }
