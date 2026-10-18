@@ -72,7 +72,7 @@ public class UserInfoController {
 
         String email = CmmUtil.nvl(request.getParameter("email")); // 회원아이디
 
-        log.info("email : " + email);
+        // 이메일 주소 등 개인정보는 로그에 기록하지 않는다.
 
         UserInfoDTO pDTO = new UserInfoDTO();
         pDTO.setEmail(EncryptUtil.encAES128CBC(email));
@@ -132,8 +132,11 @@ public class UserInfoController {
              * */
             log.info("userId : " + userId);
             log.info("userName : " + userName);
-            log.info("password : " + password);
-            log.info("email : " + email);
+
+        // 비밀번호 평문은 로그에 기록하지 않는다.
+
+        // 이메일 주소 등 개인정보는 로그에 기록하지 않는다.
+
             log.info("addr1 : " + addr1);
             log.info("addr2 : " + addr2);
 
@@ -239,7 +242,8 @@ public class UserInfoController {
             String password = CmmUtil.nvl(request.getParameter("password")); //비밀번호
 
             log.info("userId : " + userId);
-            log.info("password : " + password);
+
+        // 비밀번호 평문은 로그에 기록하지 않는다.
 
             //웹(회원정보 입력화면)에서 받는 정보를 저장할 변수를 메모리에 올리기
             pDTO = new UserInfoDTO();
@@ -354,7 +358,8 @@ public class UserInfoController {
          * ########################################################################
          * */
         log.info("userName : " + userName);
-        log.info("email : " + email);
+
+        // 이메일 주소 등 개인정보는 로그에 기록하지 않는다.
 
         /*
          * ########################################################################
@@ -427,7 +432,8 @@ public class UserInfoController {
          * */
         log.info("userId : " + userId);
         log.info("userName : " + userName);
-        log.info("email : " + email);
+
+        // 이메일 주소 등 개인정보는 로그에 기록하지 않는다.
 
         /*
          * ########################################################################
@@ -490,7 +496,8 @@ public class UserInfoController {
              * 						반드시 작성할 것
              * ########################################################################
              * */
-            log.info("password : " + password);
+
+        // 비밀번호 평문은 로그에 기록하지 않는다.
 
             /*
              * ########################################################################
