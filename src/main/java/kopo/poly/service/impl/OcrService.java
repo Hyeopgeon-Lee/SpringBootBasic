@@ -15,7 +15,7 @@ import java.io.File;
 @Service
 public class OcrService implements IOcrService {
 
-    @Value("${orc.model.data}")
+    @Value("${ocr.model.data}")
     private String ocrModel;
 
     /**
