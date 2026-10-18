@@ -1,160 +1,77 @@
 package kopo.poly.util;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.lang.Nullable;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.Objects;
 
-@Slf4j
-public class NetworkUtil {
+/**
+ * 교육용 간단 HTTP 클라이언트.
+ * 외부 API 응답 오류를 정상 JSON과 구별하고 무제한 대기를 방지한다.
+ */
+public final class NetworkUtil {
 
-    /**
-     * GET 방식으로 OpenAPI 호출하기(전송할 헤더값이 존재하지 않는 경우 사용)
-     * 네이버 API 전송 소스 참고하여 구현
-     *
-     * @param apiUrl 호출할 OpenAPI URL 주소
-     */
+    private NetworkUtil() {
+    }
+
     public static String get(String apiUrl) {
         return get(apiUrl, null);
-
     }
 
-    /**
-     * GET 방식으로 OpenAPI 호출하기
-     * 네이버 API 전송 소스 참고하여 구현
-     *
-     * @param apiUrl         호출할 OpenAPI URL 주소
-     * @param requestHeaders 전송하고 싶은 해더 정보
-     */
-    public static String get(String apiUrl, @Nullable Map<String, String> requestHeaders) {
-        HttpURLConnection con = connect(apiUrl);
+    public static String get(String apiUrl, Map<String, String> requestHeaders) {
+        return send("GET", apiUrl, requestHeaders, null);
+    }
 
+    public static String post(String apiUrl, Map<String, String> requestHeaders, String postParams) {
+        return send("POST", apiUrl, requestHeaders, postParams);
+    }
+
+    private static String send(String method, String apiUrl, Map<String, String> headers, String body) {
+        HttpURLConnection connection = null;
         try {
-            con.setRequestMethod("GET");
-
-            // 전송할 헤더 값이 존재하면, 해더 값 추가하기
-            if (requestHeaders != null) {
-                for (Map.Entry<String, String> header : requestHeaders.entrySet()) {
-                    con.setRequestProperty(header.getKey(), header.getValue());
+            connection = (HttpURLConnection) new URL(apiUrl).openConnection();
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(10000);
+            connection.setRequestMethod(method);
+            if (headers != null) {
+                headers.forEach(connection::setRequestProperty);
+            }
+            if ("POST".equals(method)) {
+                connection.setDoOutput(true);
+                byte[] bytes = (body == null ? "" : body).getBytes(StandardCharsets.UTF_8);
+                try (var output = connection.getOutputStream()) {
+                    output.write(bytes);
                 }
             }
-
-            // API 호출 후, 결과 받기
-            int responseCode = con.getResponseCode();
-
-            // API 호출이 성공하면..
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                return readBody(con.getInputStream()); // 성공 결과 값을 문자열로 변환하기
-
-            } else { // 에러 발생
-                return readBody(con.getErrorStream()); // 실패 결과 값을 문자열로 변환하기
-
+            int code = connection.getResponseCode();
+            if (code < 200 || code >= 300) {
+                throw new IllegalStateException("External API request failed (HTTP " + code + ")");
             }
-
-        } catch (IOException e) {
-            throw new RuntimeException("API 요청과 응답 실패", e);
-
+            try (InputStream input = connection.getInputStream()) {
+                return readBody(input);
+            }
+        } catch (IOException ex) {
+            // URL/credentials are intentionally not included in the error message.
+            throw new IllegalStateException("External API connection failed", ex);
         } finally {
-            con.disconnect();
+            if (connection != null) connection.disconnect();
         }
     }
 
-    /**
-     * POST 방식으로 OpenAPI 호출하기
-     * 네이버 API 전송 소스 참고하여 구현
-     *
-     * @param apiUrl         호출할 OpenAPI URL 주소
-     * @param postParams     전송할 파라미터
-     * @param requestHeaders 전송하고 싶은 해더 정보
-     */
-    public static String post(String apiUrl, @Nullable Map<String, String> requestHeaders, String postParams) {
-        HttpURLConnection con = connect(apiUrl);
-
-        try {
-            con.setRequestMethod("POST");
-
-            // 전송할 헤더 값이 존재하면, 해더 값 추가하기
-            for (Map.Entry<String, String> header : Objects.requireNonNull(requestHeaders).entrySet()) {
-                con.setRequestProperty(header.getKey(), header.getValue());
-            }
-
-            // POST 방식으로 전송할때, 전송할 파라미터 정보 넣기(GET 방식은 필요없음)
-            con.setDoOutput(true);
-            try (DataOutputStream wr = new DataOutputStream(con.getOutputStream())) {
-                wr.write(postParams.getBytes());
-                wr.flush();
-            }
-
-            // API 호출 후, 결과 받기
-            int responseCode = con.getResponseCode();
-
-            // API 호출이 성공하면..
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                return readBody(con.getInputStream()); // 성공 결과 값을 문자열로 변환하기
-
-            } else { // 에러 발생
-                return readBody(con.getErrorStream()); // 실패 결과 값을 문자열로 변환하기
-
-            }
-
-        } catch (IOException e) {
-            throw new RuntimeException("API 요청과 응답 실패", e);
-        } finally {
-            con.disconnect();
-        }
-    }
-
-    /**
-     * OpenAPI URL에 접속하기
-     * 이 함수는 NetworkUtil에서만 사용하기에 접근 제한자를 private으로 선언함
-     * 외부 자바 파일에서 호출 불가
-     *
-     * @param apiUrl 호출할 OpenAPI URL 주소
-     */
-    private static HttpURLConnection connect(String apiUrl) {
-
-        try {
-            URL url = new URL(apiUrl);
-
-            return (HttpURLConnection) url.openConnection();
-
-        } catch (MalformedURLException e) {
-            throw new RuntimeException("API URL이 잘못되었습니다. : " + apiUrl, e);
-
-        } catch (IOException e) {
-            throw new RuntimeException("연결이 실패했습니다. : " + apiUrl, e);
-
-        }
-    }
-
-    /**
-     * OpenAPI 호출 후, 받은 결과를 문자열로 변환하기
-     * 이 함수는 NetworkUtil에서만 사용하기에 접근 제한자를 private으로 선언함
-     * 외부 자바 파일에서 호출 불가
-     *
-     * @param body 읽은 결과값
-     */
-    private static String readBody(InputStream body) {
-        InputStreamReader streamReader = new InputStreamReader(body);
-
-        try (BufferedReader lineReader = new BufferedReader(streamReader)) {
-            StringBuilder responseBody = new StringBuilder();
-
+    private static String readBody(InputStream input) throws IOException {
+        if (input == null) return "";
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(input, StandardCharsets.UTF_8))) {
+            StringBuilder response = new StringBuilder();
             String line;
-            while ((line = lineReader.readLine()) != null) {
-                responseBody.append(line);
+            while ((line = reader.readLine()) != null) {
+                response.append(line);
             }
-
-            return responseBody.toString();
-        } catch (IOException e) {
-            throw new RuntimeException("API 응답을 읽는데 실패했습니다.", e);
+            return response.toString();
         }
     }
-
-
 }
