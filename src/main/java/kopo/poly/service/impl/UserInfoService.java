@@ -13,12 +13,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
+import java.security.SecureRandom;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class UserInfoService implements IUserInfoService {
+
+    private static final SecureRandom EMAIL_CODE_RANDOM = new SecureRandom();
 
     private final IUserInfoMapper userInfoMapper; // 회원관련 SQL 사용하기 위한 Mapper 가져오기
 
@@ -52,7 +54,7 @@ public class UserInfoService implements IUserInfoService {
         if (existsYn.equals("N")) {
 
             // 6자리 랜덤 숫자 생성하기
-            int authNumber = ThreadLocalRandom.current().nextInt(100000, 1000000);
+            int authNumber = 100000 + EMAIL_CODE_RANDOM.nextInt(900000);
 
             // 이메일 인증번호는 로그에 기록하지 않는다.
 
