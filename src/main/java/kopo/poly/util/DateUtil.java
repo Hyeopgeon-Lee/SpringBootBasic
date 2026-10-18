@@ -49,7 +49,7 @@ public class DateUtil {
      * @return 변환된 날짜/시간 문자열 ("yyyy-MM-dd HH:mm:ss")
      */
     public static String getLongDateTime(Object time) {
-        return getLongDateTime((Integer) time, "yyyy-MM-dd HH:mm:ss");
+        return getLongDateTime(time, "yyyy-MM-dd HH:mm:ss");
     }
 
     /**
@@ -60,7 +60,13 @@ public class DateUtil {
      * @return 포맷된 날짜/시간 문자열
      */
     public static String getLongDateTime(Object time, String format) {
-        return getLongDateTime((Integer) time, format);
+        if (time == null) return "-";
+        if (!(time instanceof Number number)) {
+            throw new IllegalArgumentException("Unix timestamp must be a number");
+        }
+        return DateTimeFormatter.ofPattern(format)
+                .withZone(ZoneId.systemDefault())
+                .format(Instant.ofEpochSecond(number.longValue()));
     }
 
     /**
