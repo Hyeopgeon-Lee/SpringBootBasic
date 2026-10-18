@@ -54,7 +54,7 @@ public class UserInfoService implements IUserInfoService {
             // 6자리 랜덤 숫자 생성하기
             int authNumber = ThreadLocalRandom.current().nextInt(100000, 1000000);
 
-            log.info("authNumber : {}", authNumber);
+            // 이메일 인증번호는 로그에 기록하지 않는다.
 
             // 인증번호 발송 로직
             MailDTO dto = new MailDTO();
