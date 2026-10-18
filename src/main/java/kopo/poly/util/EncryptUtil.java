@@ -30,7 +30,15 @@ public class EncryptUtil {
      * AES-128 CBC 암호화 시 사용할 키 (16바이트 = 128비트)
      * - 16자 이내로 지정해야 AES-128 CBC 키 조건 충족
      */
-    private static final String key = "PolyTechnic12345";
+    // Required in the deployment environment to decrypt legacy stored email addresses.
+    // Legacy AES-CBC format must eventually be migrated to authenticated encryption.
+    private static SecretKeySpec legacyAesKey() {
+        String key = System.getenv("APP_AES_KEY");
+        if (key == null || key.getBytes(StandardCharsets.UTF_8).length != 16) {
+            throw new IllegalStateException("APP_AES_KEY must contain exactly 16 UTF-8 bytes");
+        }
+        return legacyAesKey()
+    }
 
     /**
      * SHA-256 해시 함수로 문자열 암호화 (단방향)
@@ -74,7 +82,7 @@ public class EncryptUtil {
 
         byte[] textBytes = str.getBytes(StandardCharsets.UTF_8);
 
-        SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "AES");
+        SecretKeySpec keySpec = legacyAesKey()
         IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
 
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
@@ -98,7 +106,7 @@ public class EncryptUtil {
 
         byte[] encryptedBytes = Base64.getDecoder().decode(str);
 
-        SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "AES");
+        SecretKeySpec keySpec = legacyAesKey()
         IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
 
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
