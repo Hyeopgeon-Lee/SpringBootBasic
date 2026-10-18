@@ -37,7 +37,7 @@ public class EncryptUtil {
         if (key == null || key.getBytes(StandardCharsets.UTF_8).length != 16) {
             throw new IllegalStateException("APP_AES_KEY must contain exactly 16 UTF-8 bytes");
         }
-        return legacyAesKey()
+        return new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "AES");
     }
 
     /**
@@ -82,7 +82,7 @@ public class EncryptUtil {
 
         byte[] textBytes = str.getBytes(StandardCharsets.UTF_8);
 
-        SecretKeySpec keySpec = legacyAesKey()
+        SecretKeySpec keySpec = legacyAesKey();
         IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
 
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
@@ -106,7 +106,7 @@ public class EncryptUtil {
 
         byte[] encryptedBytes = Base64.getDecoder().decode(str);
 
-        SecretKeySpec keySpec = legacyAesKey()
+        SecretKeySpec keySpec = legacyAesKey();
         IvParameterSpec ivSpec = new IvParameterSpec(ivBytes);
 
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
