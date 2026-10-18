@@ -281,6 +281,7 @@ public class UserInfoController {
                  */
                 msg = "로그인이 성공했습니다.";
 
+                request.changeSessionId();
                 session.setAttribute("SS_USER_ID", userId);
                 session.setAttribute("SS_USER_NAME", CmmUtil.nvl(rDTO.getUserName()));
 
@@ -394,7 +395,6 @@ public class UserInfoController {
 
         // 강제 URL 입력 등 오는 경우가 있어 세션 삭제
         // 비밀번호 재생성하는 화면은 보안을 위해 생성한 NEW_PASSWORD 세션 삭제
-        session.setAttribute("NEW_PASSWORD", "");
         session.removeAttribute("NEW_PASSWORD");
 
         log.info(this.getClass().getName() + ".user/searchPassword End!");
