@@ -455,7 +455,12 @@ public class UserInfoController {
 
         // 비밀번호 재생성하는 화면은 보안을 위해 반드시 NEW_PASSWORD 세션이 존재해야 접속 가능하도록 구현
         // userId 값을 넣은 이유는 비밀번호 재설정하는 newPasswordProc 함수에서 사용하기 위함
-        session.setAttribute("NEW_PASSWORD", userId);
+        // Only a successfully matched account may advance to the reset form.
+        if (rDTO.getUserId() != null && rDTO.getUserId().equals(userId)) {
+            session.setAttribute("NEW_PASSWORD", userId);
+        } else {
+            session.removeAttribute("NEW_PASSWORD");
+        }
 
         log.info(this.getClass().getName() + ".user/searchPasswordProc End!");
 
