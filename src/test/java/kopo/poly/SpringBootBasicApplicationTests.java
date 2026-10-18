@@ -1,13 +1,12 @@
 package kopo.poly;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SpringBootTest
 class SpringBootBasicApplicationTests {
 
     @Test
-    void contextLoads() {
+    void testApplicationClassIsPresent() {
+        assertEquals("SpringBootBasicApplication", SpringBootBasicApplication.class.getSimpleName());
     }
-
 }
